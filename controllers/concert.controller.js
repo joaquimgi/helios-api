@@ -1,6 +1,6 @@
-const Concert = require('../models/concert.model');
-const _ = require('lodash');
-const moment = require('moment');
+const Concert = require("../models/concert.model");
+const _ = require("lodash");
+const moment = require("moment");
 
 // Create and Save a new Concert
 exports.create = (req, res) => {
@@ -9,35 +9,36 @@ exports.create = (req, res) => {
     // If Titre is not present in body reject the request by
     // sending the appropriate http code
     return res.status(400).send({
-      message: 'Titre du concert can not be empty'
+      message: "Titre du concert can not be empty",
     });
   }
 
   // Create a new Concert
   const concert = new Concert({
     title: req.body.Titre,
-    description: req.body.Description || '',
-    artiste: req.body.Artiste || '',
-    lieu: req.body.Lieu || '',
-    date: req.body.Date || '',
-    datum: req.body.Datum || '',
-    photo: req.body.Photo || ''
+    description: req.body.Description || "",
+    artiste: req.body.Artiste || "",
+    lieu: req.body.Lieu || "",
+    date: req.body.Date || "",
+    datum: req.body.Datum || "",
+    imageUrl: req.body.imageUrl || "",
   });
 
   console.log(concert);
 
-  // Save Artist in the database
+  // Save the concert in the database
   concert
     .save()
-    .then(data => {
+    .then((data) => {
       // we wait for insertion to be complete and we send the newly concert integrated
       res.send(data);
     })
-    .catch(err => {
+    .catch((err) => {
       // In case of error during insertion of a new concert in database we send an
       // appropriate message
       res.status(500).send({
-        message: err.message || 'Some error occurred while creating the concert.'
+        message:
+          err.message || "Some error occurred while creating the concert.",
       });
     });
 };
@@ -45,13 +46,14 @@ exports.create = (req, res) => {
 // Retrieve and return all Concert from the database.
 exports.findAll = (req, res) => {
   Concert.find({})
-    .then(concerts => {
-        console.log("concerts", concerts);
+    .then((concerts) => {
+      console.log("concerts", concerts);
       res.status(200).json(concerts);
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(500).send({
-        message: err.message || 'Some error occurred while retrieving concerts.'
+        message:
+          err.message || "Some error occurred while retrieving concerts.",
       });
     });
 };
@@ -59,41 +61,53 @@ exports.findAll = (req, res) => {
 // Retrieve and return the sorted list of all followers for all artists from the database.
 exports.findAllFollowers = (req, res) => {
   Concert.find({})
-    .then(concerts => {
-        const allFollowers = _.map(concerts, function(o){
-          var result = _.pick(o, ['Name', 'Followers']);
-          //const sortedAllFollowers = _.orderBy(result, ['Followers']);
-          return result;
-        })
+    .then((concerts) => {
+      const allFollowers = _.map(concerts, function (o) {
+        var result = _.pick(o, ["Name", "Followers"]);
+        //const sortedAllFollowers = _.orderBy(result, ['Followers']);
+        return result;
+      });
 
-        const sortedAllFollowers = _.sortBy(allFollowers, function(e) { return e.Followers}, ['desc']);
-        const reverse = _.reverse(sortedAllFollowers);
+      const sortedAllFollowers = _.sortBy(
+        allFollowers,
+        function (e) {
+          return e.Followers;
+        },
+        ["desc"]
+      );
+      const reverse = _.reverse(sortedAllFollowers);
 
       res.status(200).json(reverse);
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(500).send({
-        message: err.message || 'Some error occurred while retrieving artists.'
+        message: err.message || "Some error occurred while retrieving artists.",
       });
     });
 };
 
-exports.findNextBirthday = (req,res)=>{
+exports.findNextBirthday = (req, res) => {
   Concert.find({})
-    .then(concert=> {
-      const allBirthday = _.map(concert,function(o){
-        var result=_.pick(o,['Name','Birthday']);
+    .then((concert) => {
+      const allBirthday = _.map(concert, function (o) {
+        var result = _.pick(o, ["Name", "Birthday"]);
         return result;
-      })
-      var Birthday = _.find(allBirthday,{'Name':'Eminem'})
-       Birthday.Birthday= "2019"+ Birthday.Birthday.slice(4,8);
-     var obj = {Name:Birthday.Name,nextBirthday:moment(Birthday.Birthday,"YYYYMMDD").fromNow()};
-        res.status(200).json(obj)
+      });
+      var Birthday = _.find(allBirthday, { Name: "Eminem" });
+      Birthday.Birthday = "2019" + Birthday.Birthday.slice(4, 8);
+      var obj = {
+        Name: Birthday.Name,
+        nextBirthday: moment(Birthday.Birthday, "YYYYMMDD").fromNow(),
+      };
+      res.status(200).json(obj);
     })
-    .catch(err=>{res.status(500).send({
-      message: err.message || 'Some error occurred while retrieving Birthday of Artists.'
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          err.message ||
+          "Some error occurred while retrieving Birthday of Artists.",
+      });
     });
-  });
 };
 
 /* // Find a single Artist with an ArstistId

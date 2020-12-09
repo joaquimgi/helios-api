@@ -8,7 +8,7 @@ const concertSchema = new mongoose.Schema(
     lieu: String,
     date: String,
     datum: String,
-    photo: String
+    imageUrl: String
   },
   {
       collection: "Concerts"
