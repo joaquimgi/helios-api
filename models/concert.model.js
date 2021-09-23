@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const concertSchema = new mongoose.Schema(
   {
@@ -6,13 +6,13 @@ const concertSchema = new mongoose.Schema(
     description: String,
     artiste: String,
     lieu: String,
-    date: String,
+    heure: String,
     datum: String,
-    imageUrl: String
+    imageUrl: String,
   },
   {
-      collection: "Concerts"
+    collection: "Concerts",
   }
 );
 
-module.exports = mongoose.model('Concert', concertSchema);
+module.exports = mongoose.model("Concert", concertSchema);

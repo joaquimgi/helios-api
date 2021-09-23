@@ -19,7 +19,7 @@ exports.create = (req, res) => {
     description: req.body.Description || "",
     artiste: req.body.Artiste || "",
     lieu: req.body.Lieu || "",
-    date: req.body.Date || "",
+    heure: req.body.Heure || "",
     datum: req.body.Datum || "",
     imageUrl: req.body.imageUrl || "",
   });
@@ -58,138 +58,105 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Retrieve and return the sorted list of all followers for all artists from the database.
-exports.findAllFollowers = (req, res) => {
+// Retrieve and return all Concert from the database.
+exports.findConcert = (req, res) => {
+  console.log("body", req.query);
   Concert.find({})
     .then((concerts) => {
-      const allFollowers = _.map(concerts, function (o) {
-        var result = _.pick(o, ["Name", "Followers"]);
-        //const sortedAllFollowers = _.orderBy(result, ['Followers']);
-        return result;
+      let concert = concerts.filter((el) => {
+        return el.datum === req.query.datum && el.heure === req.query.heure;
       });
-
-      const sortedAllFollowers = _.sortBy(
-        allFollowers,
-        function (e) {
-          return e.Followers;
-        },
-        ["desc"]
-      );
-      const reverse = _.reverse(sortedAllFollowers);
-
-      res.status(200).json(reverse);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while retrieving artists.",
-      });
-    });
-};
-
-exports.findNextBirthday = (req, res) => {
-  Concert.find({})
-    .then((concert) => {
-      const allBirthday = _.map(concert, function (o) {
-        var result = _.pick(o, ["Name", "Birthday"]);
-        return result;
-      });
-      var Birthday = _.find(allBirthday, { Name: "Eminem" });
-      Birthday.Birthday = "2019" + Birthday.Birthday.slice(4, 8);
-      var obj = {
-        Name: Birthday.Name,
-        nextBirthday: moment(Birthday.Birthday, "YYYYMMDD").fromNow(),
-      };
-      res.status(200).json(obj);
+      res.status(200).json(concert);
     })
     .catch((err) => {
       res.status(500).send({
         message:
-          err.message ||
-          "Some error occurred while retrieving Birthday of Artists.",
+          err.message || "Some error occurred while retrieving concerts.",
       });
     });
 };
 
-/* // Find a single Artist with an ArstistId
-exports.findOne = (req, res) => {
-  Artist.findById(req.params.userId)
-    .then(user => {
-      if (!user) {
-        return res.status(404).send({
-          message: 'User not found with id ' + req.params.userId
-        });
-      }
-      res.send(user);
-    })
-    .catch(err => {
-      if (err.kind === 'ObjectId') {
-        return res.status(404).send({
-          message: 'User not found with id ' + req.params.userId
-        });
-      }
-      return res.status(500).send({
-        message: 'Error retrieving user with id ' + req.params.userId
-      });
-    });
-};
-
-// Update a User identified by the UserId in the request
-exports.update = (req, res) => {
-  // Validate Request
-  if (!req.body.firstName) {
-    return res.status(400).send({
-      message: 'first name can not be empty'
+// Retrieve and return all Concert from the database.
+exports.findConcertById = async (req, res) => {
+  try {
+    const concert = await Concert.findById(req.query.id);
+    console.log(concert._id);
+    res.json(concert);
+  } catch (err) {
+    res.status(500).send({
+      message: err.message || "Some error occurred while retrieving concerts.",
     });
   }
+};
 
-  // Find user and update it with the request body
-  User.findByIdAndUpdate(
-    req.params.userId,
-    {
-      title: req.body.firstName,
-      content: req.body.lastName || ''
-    },
-    { new: true }
-  )
-    .then(user => {
-      if (!user) {
-        return res.status(404).send({
-          message: 'User not found with id ' + req.params.userId
-        });
-      }
-      res.send(user);
+// Retrieve and return the sorted list of the next 5 concerts.
+exports.findComingSoon = (req, res) => {
+  Concert.find({})
+    .then((concerts) => {
+      let sortedConcerts = concerts.sort((a, b) => {
+        let c = new Date(a.datum);
+        let d = new Date(b.datum);
+        return c - d;
+      });
+
+      let comingSoon = sortedConcerts.filter((el) => {
+        let elDate = new Date(el.datum);
+        let today = new Date();
+        return elDate > today;
+      });
+
+      console.log(comingSoon);
+
+      res.status(200).json(comingSoon);
     })
-    .catch(err => {
-      if (err.kind === 'ObjectId') {
-        return res.status(404).send({
-          message: 'User not found with id ' + req.params.userId
-        });
-      }
-      return res.status(500).send({
-        message: 'Error updating user with id ' + req.params.userId
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving concerts.",
       });
     });
 };
 
-// Delete a User with the specified UserId in the request
-exports.delete = (req, res) => {
-  User.findByIdAndRemove(req.params.userId)
-    .then(user => {
-      if (!user) {
+// Update a concert identified by the concertId in the request
+exports.update = (req, res) => {
+  // Validate Request
+  if (!req.body.title) {
+    return res.status(400).send({
+      message: "title can not be empty",
+    });
+  }
+  console.log("body", req.body);
+
+  // Find concert and update it with the request body
+  Concert.update(
+    { _id: req.body.id },
+    {
+      title: req.body.title,
+      description: req.body.description,
+      artiste: req.body.artiste,
+      lieu: req.body.lieu,
+      heure: req.body.heure,
+      datum: req.body.datum,
+      imageUrl: req.body.imageUrl,
+    },
+    { overwrite: true }
+  )
+    .then((concert) => {
+      if (!concert) {
         return res.status(404).send({
-          message: 'User not found with id ' + req.params.userId
+          message: "concert not found with heure " + req.body.heure,
         });
       }
-      res.send({ message: 'User deleted successfully!' });
+      res.send(concert);
     })
-    .catch(err => {
-      if (err.kind === 'ObjectId' || err.name === 'NotFound') {
+    .catch((err) => {
+      if (err.kind === "ObjectId") {
         return res.status(404).send({
-          message: 'User not found with id ' + req.params.userId
+          message: "concert not found with id " + req.body.heure,
         });
       }
       return res.status(500).send({
-        message: 'Could not delete user with id ' + req.params.userId
+        message: "Error updating concert with id " + req.body.heure,
       });
     });
-}; */
+};
