@@ -14,6 +14,9 @@ const cors = require("cors");
 //Set up mongoose connection
 var mongoose = require("mongoose");
 var mongoDB = process.env.MONGO_DB_CONNECTION;
+
+console.log("Database_URL", process.env.MONGO_DB_CONNECTION);
+
 mongoose.connect(mongoDB, { useNewUrlParser: true }, (ref) => {
   console.log("Connected to mongo server.");
   //trying to get collection names
