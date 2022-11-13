@@ -22,6 +22,8 @@ exports.create = (req, res) => {
     heure: req.body.Heure || "",
     datum: req.body.Datum || "",
     imageUrl: req.body.imageUrl || "",
+    phone: req.body.phone || "",
+    billeterie: req.body.billeterie || "",
   });
 
   console.log(concert);

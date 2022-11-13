@@ -9,9 +9,11 @@ const concertSchema = new mongoose.Schema(
     heure: String,
     datum: String,
     imageUrl: String,
+    billeterie: String,
+    phone: String,
   },
   {
-    collection: "Concerts",
+    collection: "ConcertsTest",
   }
 );
 
